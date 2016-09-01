@@ -465,6 +465,15 @@ class MapView extends React.Component {
       };
     }
 
+    if (Platform.OS === 'android' && this.props.liteMode) {
+      return (
+        <AIRMapLite
+          ref={ref => { this.map = ref; }}
+          {...props}
+        />
+      );
+    }
+
     return (
       <AIRMap
         ref={ref => { this.map = ref; }}
@@ -478,6 +487,14 @@ MapView.propTypes = propTypes;
 MapView.viewConfig = viewConfig;
 
 const AIRMap = requireNativeComponent('AIRMap', MapView, {
+  nativeOnly: {
+    onChange: true,
+    onMapReady: true,
+    handlePanDrag: true,
+  },
+});
+
+const AIRMapLite = requireNativeComponent('AIRMap', MapView, {
   nativeOnly: {
     onChange: true,
     onMapReady: true,
