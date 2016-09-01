@@ -1,4 +1,3 @@
-//TT_SPORTS: Added to support liteMode
 package com.airbnb.android.react.maps;
 
 import com.facebook.react.bridge.ReactApplicationContext;
