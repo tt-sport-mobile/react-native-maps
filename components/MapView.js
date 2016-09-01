@@ -494,7 +494,7 @@ const AIRMap = requireNativeComponent('AIRMap', MapView, {
   },
 });
 
-const AIRMapLite = requireNativeComponent('AIRMap', MapView, {
+const AIRMapLite = requireNativeComponent('AIRMapLite', MapView, {
   nativeOnly: {
     onChange: true,
     onMapReady: true,
