@@ -1,12 +1,13 @@
 import React from 'react';
 import {
-  StyleSheet,
-  View,
   Text,
+  View,
   Dimensions,
+  StyleSheet,
 } from 'react-native';
 
 import MapView from 'react-native-maps';
+import flagImg from './assets/flag-blue.png';
 
 const { width, height } = Dimensions.get('window');
 
@@ -15,13 +16,9 @@ const LATITUDE = 37.78825;
 const LONGITUDE = -122.4324;
 const LATITUDE_DELTA = 0.0922;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
-let id = 0;
+const SPACE = 0.01;
 
-function randomColor() {
-  return `#${Math.floor(Math.random() * 16777215).toString(16)}`;
-}
-
-class DefaultMarkers extends React.Component {
+class LoadingMap extends React.Component {
   constructor(props) {
     super(props);
 
@@ -32,21 +29,7 @@ class DefaultMarkers extends React.Component {
         latitudeDelta: LATITUDE_DELTA,
         longitudeDelta: LONGITUDE_DELTA,
       },
-      markers: [],
     };
-  }
-
-  onMapPress(e) {
-    this.setState({
-      markers: [
-        ...this.state.markers,
-        {
-          coordinate: e.nativeEvent.coordinate,
-          key: id++,
-          color: randomColor(),
-        },
-      ],
-    });
   }
 
   render() {
@@ -55,19 +38,38 @@ class DefaultMarkers extends React.Component {
         <MapView
           style={styles.map}
           initialRegion={this.state.region}
-          onPress={(e) => this.onMapPress(e)}
+          onPress={this.onMapPress}
+          loadingEnabled
+          loadingIndicatorColor={"#666666"}
+          loadingBackgroundColor={"#eeeeee"}
         >
-          {this.state.markers.map(marker => (
-            <MapView.Marker
-              key={marker.key}
-              coordinate={marker.coordinate}
-              pinColor={marker.color}
-            />
-          ))}
+          <MapView.Marker
+            coordinate={{
+              latitude: LATITUDE + SPACE,
+              longitude: LONGITUDE + SPACE,
+            }}
+            centerOffset={{ x: -18, y: -60 }}
+            anchor={{ x: 0.69, y: 1 }}
+            image={flagImg}
+          />
+          <MapView.Marker
+            coordinate={{
+              latitude: LATITUDE - SPACE,
+              longitude: LONGITUDE - SPACE,
+            }}
+            centerOffset={{ x: -42, y: -60 }}
+            anchor={{ x: 0.84, y: 1 }}
+          >
+            <MapView.Callout>
+              <View>
+                <Text>This is a plain view</Text>
+              </View>
+            </MapView.Callout>
+          </MapView.Marker>
         </MapView>
         <View style={styles.buttonContainer}>
           <View style={styles.bubble}>
-            <Text>Tap to create a marker of random color</Text>
+            <Text>Map with Loading</Text>
           </View>
         </View>
       </View>
@@ -90,16 +92,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 20,
   },
-  latlng: {
-    width: 200,
-    alignItems: 'stretch',
-  },
-  button: {
-    width: 80,
-    paddingHorizontal: 12,
-    alignItems: 'center',
-    marginHorizontal: 10,
-  },
   buttonContainer: {
     flexDirection: 'row',
     marginVertical: 20,
@@ -107,4 +99,4 @@ const styles = StyleSheet.create({
   },
 });
 
-module.exports = DefaultMarkers;
+module.exports = LoadingMap;

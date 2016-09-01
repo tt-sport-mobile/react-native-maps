@@ -1,5 +1,7 @@
+//TT_SPORTS: Added to support liteMode
 package com.airbnb.android.react.maps;
 
+import com.facebook.react.bridge.ReactApplicationContext;
 import com.google.android.gms.maps.GoogleMapOptions;
 
 public class AirMapLiteManager extends AirMapManager {
@@ -11,8 +13,8 @@ public class AirMapLiteManager extends AirMapManager {
         return REACT_CLASS;
     }
 
-    public AirMapLiteManager(AirMapMarkerManager markerManager, AirMapPolylineManager polylineManager, AirMapPolygonManager polygonManager, AirMapCircleManager circleManager) {
-        super(markerManager, polylineManager, polygonManager, circleManager);
+    public AirMapLiteManager(ReactApplicationContext context) {
+        super(context);
         this.googleMapOptions = new GoogleMapOptions().liteMode(true);
     }
 
