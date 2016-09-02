@@ -498,7 +498,7 @@ const AIRMapLite = requireNativeComponent('AIRMapLite', MapView, {
   nativeOnly: {
     onChange: true,
     onMapReady: true,
-    handlePanDrag: true,
+    handlePanDrag: false,
   },
 });
 
