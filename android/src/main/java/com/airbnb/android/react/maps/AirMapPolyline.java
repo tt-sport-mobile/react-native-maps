@@ -92,7 +92,8 @@ public class AirMapPolyline extends AirMapFeature {
     @Override
     public void addToMap(GoogleMap map) {
         polyline = map.addPolyline(getPolylineOptions());
-        polyline.setClickable(true);
+        // Disabled clickable polyline https://jira.tomtomgroup.com/browse/FITMOB-4467
+        polyline.setClickable(false);
     }
 
     @Override
