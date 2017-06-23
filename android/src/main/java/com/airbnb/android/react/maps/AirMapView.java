@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.MotionEventCompat;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -21,6 +22,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
 import com.facebook.react.bridge.LifecycleEventListener;
+import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
@@ -69,6 +71,8 @@ public class AirMapView extends MapView implements GoogleMap.InfoWindowAdapter,
     private boolean moveOnMarkerPress = true;
     private boolean cacheEnabled = false;
 
+    private static final String TAG = "AirMapView";
+
     private static final String[] PERMISSIONS = new String[] {
             "android.permission.ACCESS_FINE_LOCATION", "android.permission.ACCESS_COARSE_LOCATION"};
 
@@ -85,16 +89,61 @@ public class AirMapView extends MapView implements GoogleMap.InfoWindowAdapter,
     private final ThemedReactContext context;
     private final EventDispatcher eventDispatcher;
 
-    public AirMapView(ThemedReactContext reactContext, AirMapManager manager,
-            GoogleMapOptions googleMapOptions) {
-        super(reactContext.hasCurrentActivity() ? reactContext.getCurrentActivity() : reactContext, googleMapOptions);
+    private static boolean contextHasBug(Context context) {
+        if (context == null) {
+            Log.i(TAG, "contextHasBug null context");
+        } else if (context.getResources() == null) {
+            Log.i(TAG, "contextHasBug null resources");
+        } else if (context.getResources().getConfiguration() == null) {
+            Log.i(TAG, "contextHasBug null configuration");
+        }
+        return context == null ||
+            context.getResources() == null ||
+            context.getResources().getConfiguration() == null;
+    }
+
+    // We do this to fix this bug:
+    // https://github.com/airbnb/react-native-maps/issues/271
+    //
+    // which conflicts with another bug regarding the passed in context:
+    // https://github.com/airbnb/react-native-maps/issues/1147
+    //
+    // Doing this allows us to avoid both bugs.
+    private static Context getNonBuggyContext(ThemedReactContext reactContext,
+                                                  ReactApplicationContext appContext) {
+        Context superContext = reactContext;
+        if (!contextHasBug(appContext.getCurrentActivity())) {
+            Log.i(TAG, "getNonBuggyContext using appContext's current activity");
+            superContext = appContext.getCurrentActivity();
+        } else if (contextHasBug(superContext)) {
+            // we have the bug! let's try to find a better context to use
+            if (!contextHasBug(reactContext.getCurrentActivity())) {
+                Log.i(TAG, "getNonBuggyContext using reactContext's current activity");
+                superContext = reactContext.getCurrentActivity();
+            } else if (!contextHasBug(reactContext.getApplicationContext())) {
+                Log.i(TAG, "getNonBuggyContext using reactContext's application context");
+                superContext = reactContext.getApplicationContext();
+            } else {
+                // ¯\_(ツ)_/¯
+                Log.i(TAG, "getNonBuggyContext using reactContext");
+            }
+        }
+        return superContext;
+    }
+
+    public AirMapView(ThemedReactContext reactContext, ReactApplicationContext appContext, AirMapManager manager,
+                      GoogleMapOptions googleMapOptions) {
+        super(getNonBuggyContext(reactContext, appContext), googleMapOptions);
 
         this.manager = manager;
         this.context = reactContext;
 
+        Log.i(TAG, "Constructor calling onCreate");
         super.onCreate(null);
         // TODO(lmr): what about onStart????
+        Log.i(TAG, "Constructor calling onResume");
         super.onResume();
+        Log.i(TAG, "Constructor calling getMapAsync");
         super.getMapAsync(this);
 
         final AirMapView view = this;
