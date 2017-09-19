@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.MotionEventCompat;
+import android.util.Base64;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -44,6 +45,7 @@ import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.VisibleRegion;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -846,8 +848,18 @@ public class AirMapView extends MapView implements GoogleMap.InfoWindowAdapter,
       cacheImageView.setVisibility(View.INVISIBLE);
       mapLoadingLayout.setVisibility(View.VISIBLE);
       if (this.isMapLoaded) {
+        final AirMapView view = this;
         this.map.snapshot(new GoogleMap.SnapshotReadyCallback() {
           @Override public void onSnapshotReady(Bitmap bitmap) {
+            if (bitmap != null) {
+              ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+              bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+              byte[] bytes = outputStream.toByteArray();
+              String data = Base64.encodeToString(bytes, Base64.NO_WRAP);
+              WritableMap event = new WritableNativeMap();
+              event.putString("data", data);
+              view.manager.pushEvent(context, view, "onCache", event);
+            }
             cacheImageView.setImageBitmap(bitmap);
             cacheImageView.setVisibility(View.VISIBLE);
             mapLoadingLayout.setVisibility(View.INVISIBLE);

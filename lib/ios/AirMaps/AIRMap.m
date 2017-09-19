@@ -388,6 +388,11 @@ const NSInteger AIRMapMaxZoomLevel = 20;
                 [self.layer renderInContext:UIGraphicsGetCurrentContext()];
                 UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
                 UIGraphicsEndImageContext();
+                if (self.onCache) {
+                    NSData *data = UIImagePNGRepresentation(image);
+                    id event = @{@"data": [data base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithCarriageReturn]};
+                    self.onCache(event);
+                }
 
                 self.cacheImageView.image = image;
                 self.cacheImageView.hidden = NO;

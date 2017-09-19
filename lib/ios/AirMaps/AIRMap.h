@@ -52,6 +52,7 @@ extern const NSInteger AIRMapMaxZoomLevel;
 @property (nonatomic, copy) RCTBubblingEventBlock onPress;
 @property (nonatomic, copy) RCTBubblingEventBlock onPanDrag;
 @property (nonatomic, copy) RCTBubblingEventBlock onLongPress;
+@property (nonatomic, copy) RCTBubblingEventBlock onCache;
 @property (nonatomic, copy) RCTDirectEventBlock onMarkerPress;
 @property (nonatomic, copy) RCTDirectEventBlock onMarkerSelect;
 @property (nonatomic, copy) RCTDirectEventBlock onMarkerDeselect;
