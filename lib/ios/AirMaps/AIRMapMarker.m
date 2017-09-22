@@ -302,4 +302,11 @@
     self.layer.zPosition = _zIndex;
 }
 
+#pragma mark AIRMapSnapshot implementation
+
+- (void) drawToSnapshot:(MKMapSnapshot *) snapshot context:(CGContextRef) context
+{
+    [self.layer renderInContext:context];
+}
+
 @end

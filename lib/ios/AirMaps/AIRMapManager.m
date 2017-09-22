@@ -259,6 +259,7 @@ RCT_EXPORT_METHOD(takeSnapshot:(nonnull NSNumber *)reactTag
               ([height floatValue] == 0) ? mapView.bounds.size.height : [height floatValue]
             );
             options.scale = [[UIScreen mainScreen] scale];
+            options.showsPointsOfInterest = mapView.showsPointsOfInterest;
 
             MKMapSnapshotter *snapshotter = [[MKMapSnapshotter alloc] initWithOptions:options];
 
@@ -298,6 +299,12 @@ RCT_EXPORT_METHOD(takeSnapshot:(nonnull NSNumber *)reactTag
 
                       CGRect rect = CGRectMake(0.0f, 0.0f, image.size.width, image.size.height);
 
+                      for (id <AIRMapSnapshot> overlay in mapView.overlays) {
+                          if ([overlay respondsToSelector:@selector(drawToSnapshot:context:)]) {
+                                  [overlay drawToSnapshot:snapshot context:UIGraphicsGetCurrentContext()];
+                          }
+                      }
+
                       for (id <MKAnnotation> annotation in mapView.annotations) {
                           CGPoint point = [snapshot pointForCoordinate:annotation.coordinate];
 
@@ -310,13 +317,13 @@ RCT_EXPORT_METHOD(takeSnapshot:(nonnull NSNumber *)reactTag
                           if (CGRectContainsPoint(rect, point)) {
                               point.x = point.x + pin.centerOffset.x - (pin.bounds.size.width / 2.0f);
                               point.y = point.y + pin.centerOffset.y - (pin.bounds.size.height / 2.0f);
-                              [pin.image drawAtPoint:point];
-                          }
-                      }
-
-                      for (id <AIRMapSnapshot> overlay in mapView.overlays) {
-                          if ([overlay respondsToSelector:@selector(drawToSnapshot:context:)]) {
-                                  [overlay drawToSnapshot:snapshot context:UIGraphicsGetCurrentContext()];
+                              if (pin.image) {
+                                  [pin.image drawAtPoint:point];
+                              } else if ([(<AIRMapSnapshot>) annotation respondsToSelector:@selector(drawToSnapshot:context:)]) {
+                                  CGContextTranslateCTM(UIGraphicsGetCurrentContext(), point.x, point.y);
+                                  [(<AIRMapSnapshot>) annotation drawToSnapshot:snapshot context:UIGraphicsGetCurrentContext()];
+                                  CGContextTranslateCTM(UIGraphicsGetCurrentContext(), -point.x, -point.y);
+                              }
                           }
                       }
 
