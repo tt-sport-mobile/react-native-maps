@@ -260,6 +260,7 @@ RCT_EXPORT_METHOD(takeSnapshot:(nonnull NSNumber *)reactTag
             );
             options.scale = [[UIScreen mainScreen] scale];
             options.showsPointsOfInterest = mapView.showsPointsOfInterest;
+            options.mapType = mapView.mapType;
 
             MKMapSnapshotter *snapshotter = [[MKMapSnapshotter alloc] initWithOptions:options];
 
